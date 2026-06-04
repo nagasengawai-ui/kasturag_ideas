@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>IdeaHub Community | Connect, Share, Innovate</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="IdeaHub Community - A professional platform by Kasturag Tech for sharing problems, ideas, startup concepts, and technology discussions.">
+  <meta name="keywords" content="community, ideas, startups, technology, discussions, innovation">
+  <meta name="author" content="Kasturag Tech">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph Tags -->
+  <meta property="og:title" content="IdeaHub Community">
+  <meta property="og:description" content="Connect with innovators, share ideas, and solve problems together.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://ideahub.kasturagtech.com/og-image.jpg">
+  
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="IdeaHub Community">
+  <meta name="twitter:description" content="Connect, share, and innovate with the global tech community.">
+  
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Preserved existing glassmorphism design with enhancements */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fc;
+      transition: background 0.3s, color 0.3s;
+      scroll-behavior: smooth;
+    }
+    
+    body.dark {
+      background: #0a0c12;
+      color: #eef2ff;
+    }
+    
+    /* Glassmorphism Core - Preserved */
+    .glass-card, nav, .card, .modal-content, .marketing-banner, .brand-badge, .post-card, .profile-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s ease;
+    }
+    
+    body.dark .glass-card, body.dark nav, body.dark .card, body.dark .modal-content, 
+    body.dark .marketing-banner, body.dark .brand-badge, body.dark .post-card {
+      background: rgba(18, 22, 36, 0.88);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Enhanced Button Styles */
+    .btn-primary {
+      background: linear-gradient(135deg, #2D4BFF, #7C3AFF);
+      border: none;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary:hover { transform: scale(1.02); opacity: 0.95; box-shadow: 0 8px 18px rgba(45,75,255,0.3); }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid #2D4BFF;
+      border-radius: 40px;
+      padding: 8px 20px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    /* Notification Bell */
+    .notification-bell {
+      position: relative;
+      cursor: pointer;
+      font-size: 1.4rem;
+      background: none;
+      border: none;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -8px;
+      background: #ff4444;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+    
+    /* Image Upload Preview */
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .image-preview img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    
+    /* Infinite Scroll Loader */
+    .loader {
+      text-align: center;
+      padding: 20px;
+      display: none;
+    }
+    
+    .loader.active { display: block; }
+    
+    .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #2D4BFF; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+    
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    /* Responsive */
+    .container { max-width: 1300px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 12px 28px; margin: 20px 24px; border-radius: 80px; }
+    .logo { font-family: 'Space Grotesk', monospace; font-weight: 700; font-size: 1.6rem; background: linear-gradient(135deg, #2D4BFF, #B842FF); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .grid-posts { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px; margin-top: 28px; }
+    .post-card { padding: 22px; cursor: pointer; transition: transform 0.2s; }
+    .post-card:hover { transform: translateY(-4px); }
+    
+    @media (max-width: 768px) { nav { margin: 12px; } .grid-posts { grid-template-columns: 1fr; } }
+    
+    /* Accessibility */
+    button:focus, a:focus, input:focus { outline: 2px solid #2D4BFF; outline-offset: 2px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <nav>
+    <div class="logo">💡 IdeaHub Community</div>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+      <button id="homeNavBtn" class="btn-outline">Home</button>
+      <button id="aboutNavBtn" class="btn-outline">About</button>
+      <button id="dashboardNavBtn" class="btn-outline" style="display: none;">Dashboard</button>
+      <button id="notificationsBtn" class="notification-bell" aria-label="Notifications">🔔<span id="notificationBadge" class="notification-badge" style="display: none;">0</span></button>
+      <button id="authBtn" class="btn-primary">Sign In</button>
+      <button id="themeToggleBtn" style="background: none; border: none; font-size: 1.4rem; cursor: pointer;">🌙</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="brand-badge" style="background: linear-gradient(95deg, #2D4BFF15, #B842FF15); justify-content: center; margin: 8px auto 20px; width: fit-content; padding: 10px 20px;">
+      ⚡ Platform Developed and Maintained by <strong>Kasturag Tech</strong> | Enterprise-Grade Security
+    </div>
+  </div>
+
+  <main class="container" id="mainContent"></main>
+  <div class="container" id="marketingSection"></div>
+
+  <footer class="footer" style="text-align: center; padding: 32px 20px; margin-top: 60px;">
+    <p>© 2026 IdeaHub Community · Developed and Managed by Kasturag Tech · All Rights Reserved.</p>
+    <div class="brand-badge" style="display: inline-block; margin-top: 12px;">🔹 Built by Kasturag Tech — Innovating Digital Future 🔹</div>
+    <div style="margin-top: 16px;">
+      <a href="https://kasturagtech.com" target="_blank" style="color: #2D4BFF; text-decoration: none;">Website</a> |
+      <a href="mailto:hello@kasturagtech.com" style="color: #2D4BFF; text-decoration: none;">Email</a> |
+      <a href="#" style="color: #2D4BFF; text-decoration: none;">LinkedIn</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // ==================== SUPABASE CONFIGURATION ====================
+  // REPLACE WITH YOUR ACTUAL SUPABASE CREDENTIALS
+  const SUPABASE_URL = 'https://your-project.supabase.co';
+  const SUPABASE_ANON_KEY = 'your-anon-key';
+  
+  let supabase;
+  let currentUser = null;
+  let currentSession = null;
+  let notificationSubscription = null;
+  let postsOffset = 0;
+  let isLoading = false;
+  let hasMore = true;
+  
+  // Initialize Supabase
+  try {
+    if (SUPABASE_URL.includes('your-project') === false && SUPABASE_ANON_KEY.includes('your-anon') === false) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log("✅ Supabase connected");
+      initAuthListener();
+    } else {
+      throw new Error("Please configure Supabase credentials");
+    }
+  } catch(e) {
+    console.error("⚠️ Supabase configuration required:", e);
+    document.getElementById('mainContent').innerHTML = '<div class="glass-card" style="padding: 40px; text-align:center;"><h2>⚠️ Configuration Required</h2><p>Please set your Supabase URL and Anon Key in the script.</p></div>';
+  }
+  
+  // XSS Protection - Sanitize all user input
+  function sanitizeHTML(str) {
+    if (!str) return '';
+    return DOMPurify.sanitize(str, { ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a'], ALLOWED_ATTR: ['href', 'target'] });
+  }
+  
+  // Auth Listener for Session Persistence
+  async function initAuthListener() {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        currentSession = session;
+        await loadUserProfile(session.user.id);
+      } else {
+        currentUser = null;
+        currentSession = null;
+      }
+      updateAuthUI();
+      renderCurrentView();
+    });
+    
+    // Auto-login check
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      currentSession = session;
+      await loadUserProfile(session.user.id);
+    }
+    updateAuthUI();
+    renderCurrentView();
+  }
+  
+  async function loadUserProfile(userId) {
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+    if (data && !error) {
+      currentUser = { id: userId, ...data };
+    } else if (!error) {
+      // Create profile if not exists
+      const { data: newProfile } = await supabase.from('profiles').insert({ id: userId, fullname: 'User', username: `user_${userId.slice(0,8)}`, join_date: new Date() }).select().single();
+      currentUser = newProfile;
+    }
+  }
+  
+  // Authentication Functions
+  async function signUp(email, password, fullname, username) {
+    const { data, error } = await supabase.auth.signUp({ 
+      email, password, 
+      options: { data: { fullname, username, email_confirm: true } }
+    });
+    if (error) throw error;
+    
+    // Send email verification
+    return data;
+  }
+  
+  async function signIn(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  }
+  
+  async function signOut() {
+    await supabase.auth.signOut();
+    currentUser = null;
+    updateAuthUI();
+    renderCurrentView();
+  }
+  
+  async function resetPassword(email) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    if (error) throw error;
+    return true;
+  }
+  
+  // Real-time Subscriptions
+  function subscribeToNotifications() {
+    if (!currentUser) return;
+    if (notificationSubscription) notificationSubscription.unsubscribe();
+    
+    notificationSubscription = supabase
+      .channel('notifications')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${currentUser.id}` }, 
+        (payload) => {
+          updateNotificationBadge();
+          showToast('New notification received!');
+        })
+      .subscribe();
+  }
+  
+  async function updateNotificationBadge() {
+    if (!currentUser) return;
+    const { count } = await supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('is_read', false);
+    const badge = document.getElementById('notificationBadge');
+    if (count > 0) {
+      badge.style.display = 'inline-block';
+      badge.textContent = count;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  
+  // Create Post with Image Upload
+  async function createPost(title, content, category, tags, images = []) {
+    if (!currentUser) throw new Error("Login required");
+    
+    // Upload images to Supabase Storage
+    const imageUrls = [];
+    for (const image of images) {
+      const fileExt = image.name.split('.').pop();
+      const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
+      const { data, error } = await supabase.storage.from('post-images').upload(fileName, image);
+      if (!error) {
+        const { data: { publicUrl } } = supabase.storage.from('post-images').getPublicUrl(fileName);
+        imageUrls.push(publicUrl);
+      }
+    }
+    
+    const { data, error } = await supabase.from('posts').insert({
+      title: sanitizeHTML(title),
+      content: sanitizeHTML(content),
+      category,
+      tags: tags.split(',').map(t => t.trim()),
+      images: imageUrls,
+      author_id: currentUser.id,
+      likes_count: 0,
+      comments_count: 0
+    }).select();
+    
+    if (error) throw error;
+    return data;
+  }
+  
+  // Like/Unlike Post
+  async function toggleLikePost(postId) {
+    if (!currentUser) return;
+    
+    const { data: existing } = await supabase.from('likes').select().eq('post_id', postId).eq('user_id', currentUser.id).single();
+    
+    if (existing) {
+      await supabase.from('likes').delete().eq('id', existing.id);
+      await supabase.rpc('decrement_post_likes', { post_id: postId });
+    } else {
+      await supabase.from('likes').insert({ post_id: postId, user_id: currentUser.id });
+      await supabase.rpc('increment_post_likes', { post_id: postId });
+      
+      // Create notification for post author
+      const { data: post } = await supabase.from('posts').select('author_id').eq('id', postId).single();
+      if (post && post.author_id !== currentUser.id) {
+        await supabase.from('notifications').insert({
+          user_id: post.author_id,
+          type: 'like',
+          content: `${currentUser.fullname} liked your post`,
+          reference_id: postId
+        });
+      }
+    }
+    renderCurrentView();
+  }
+  
+  // Follow/Unfollow User
+  async function toggleFollowUser(targetUserId) {
+    if (!currentUser || targetUserId === currentUser.id) return;
+    
+    const { data: existing } = await supabase.from('followers').select().eq('follower_id', currentUser.id).eq('following_id', targetUserId).single();
+    
+    if (existing) {
+      await supabase.from('followers').delete().eq('id', existing.id);
+    } else {
+      await supabase.from('followers').insert({ follower_id: currentUser.id, following_id: targetUserId });
+      
+      // Create notification
+      await supabase.from('notifications').insert({
+        user_id: targetUserId,
+        type: 'follow',
+        content: `${currentUser.fullname} started following you`,
+        reference_id: currentUser.id
+      });
+    }
+    renderCurrentView();
+  }
+  
+  // Add Nested Comment
+  async function addComment(postId, text, parentId = null) {
+    if (!currentUser) return;
+    
+    const { data, error } = await supabase.from('comments').insert({
+      post_id: postId,
+      user_id: currentUser.id,
+      content: sanitizeHTML(text),
+      parent_id: parentId
+    }).select();
+    
+    if (!error) {
+      await supabase.rpc('increment_post_comments', { post_id: postId });
+      
+      // Get post author for notification
+      const { data: post } = await supabase.from('posts').select('author_id').eq('id', postId).single();
+      if (post && post.author_id !== currentUser.id) {
+        await supabase.from('notifications').insert({
+          user_id: post.author_id,
+          type: 'comment',
+          content: `${currentUser.fullname} commented on your post`,
+          reference_id: postId
+        });
+      }
+    }
+    renderCurrentView();
+  }
+  
+  // Search System with Instant Results
+  async function searchPosts(query, category = null) {
+    let searchQuery = supabase.from('posts').select('*, profiles(fullname, avatar_url)').ilike('title', `%${query}%`);
+    if (category && category !== 'All') searchQuery = searchQuery.eq('category', category);
+    const { data } = await searchQuery.limit(20);
+    return data || [];
+  }
+  
+  // Admin Functions
+  async function adminDeletePost(postId) {
+    if (!currentUser?.is_admin) return;
+    await supabase.from('posts').delete().eq('id', postId);
+    renderCurrentView();
+  }
+  
+  async function getAdminAnalytics() {
+    const [users, posts, comments, likes] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact' }),
+      supabase.from('posts').select('*', { count: 'exact' }),
+      supabase.from('comments').select('*', { count: 'exact' }),
+      supabase.from('likes').select('*', { count: 'exact' })
+    ]);
+    return { users: users.count, posts: posts.count, comments: comments.count, likes: likes.count };
+  }
+  
+  // UI Rendering (Preserved existing layout)
+  let currentView = 'home';
+  
+  function updateAuthUI() {
+    const authBtn = document.getElementById('authBtn');
+    const dashboardBtn = document.getElementById('dashboardNavBtn');
+    if (currentUser) {
+      authBtn.innerText = `👤 ${currentUser.fullname?.split(' ')[0] || 'Profile'}`;
+      dashboardBtn.style.display = 'inline-block';
+      subscribeToNotifications();
+      updateNotificationBadge();
+    } else {
+      authBtn.innerText = 'Sign In';
+      dashboardBtn.style.display = 'none';
+    }
+  }
+  
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'glass-card';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '12px 24px';
+    toast.style.zIndex = '9999';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+  
+  function renderMarketing() {
+    document.getElementById('marketingSection').innerHTML = `
+      <div class="marketing-banner glass-card" style="padding: 28px 24px; margin: 32px 0; text-align: center;">
+        <h3 style="font-weight: 700;">🚀 Need Professional IT Services?</h3>
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin: 22px 0;">
+          <span>🌐 Website Development</span> <span>📱 Web Applications</span> <span>📲 Mobile Apps</span>
+          <span>☁️ Cloud Solutions</span> <span>🤖 AI Solutions</span> <span>⚙️ Business Automation</span>
+        </div>
+        <div class="brand-badge" style="display: inline-block; margin: 10px auto;">✨ Built by Kasturag Tech — Enterprise Solutions ✨</div>
+        <p style="margin-top: 16px;">📧 <strong>hello@kasturagtech.com</strong> | 🌐 <strong>kasturagtech.com</strong> | Custom software solutions tailored for you.</p>
+        <div style="margin-top: 16px;">
+          <a href="#" style="color: #2D4BFF; text-decoration: none;">Contact Sales →</a>
+        </div>
+      </div>
+    `;
+  }
+  
+  async function renderHome() {
+    const { data: posts } = await supabase.from('posts').select('*, profiles(fullname, avatar_url)').order('created_at', { ascending: false }).limit(20);
+    
+    const html = `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin: 24px 0;">
+        <h2>🔥 Community Feed</h2>
+        <button id="createPostBtn" class="btn-primary">+ Share Idea / Problem</button>
+      </div>
+      <div class="grid-posts" id="postsGrid">
+        ${posts?.map(post => `
+          <div class="post-card glass-card" data-postid="${post.id}">
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 14px;">
+              <img src="${post.profiles?.avatar_url || 'https://ui-avatars.com/api/?background=2D4BFF&color=fff&name='+post.profiles?.fullname}" class="profile-img" style="width: 48px; height: 48px; border-radius: 50%;">
+              <div><b>${sanitizeHTML(post.profiles?.fullname)}</b><br><small>${new Date(post.created_at).toLocaleDateString()}</small></div>
+              ${currentUser?.is_admin ? `<button class="deletePostBtn" data-id="${post.id}" style="margin-left: auto; background: none; border: none; color: red;">🗑️</button>` : ''}
+            </div>
+            <h3 style="margin: 8px 0;">${sanitizeHTML(post.title)}</h3>
+            <p style="color: #4b5563; margin-bottom: 16px;">${sanitizeHTML(post.content.substring(0, 100))}${post.content.length > 100 ? '...' : ''}</p>
+            ${post.images?.length ? `<div class="image-preview">${post.images.slice(0, 3).map(img => `<img src="${img}" style="width: 80px; height: 80px; object-fit: cover;">`).join('')}</div>` : ''}
+            <div style="display: flex; gap: 20px; margin-top: 12px;">
+              <button class="likePostBtn" data-id="${post.id}">❤️ ${post.likes_count || 0}</button>
+              <button class="commentTriggerBtn" data-id="${post.id}">💬 ${post.comments_count || 0}</button>
+              <button class="savePostBtn" data-id="${post.id}">🔖 Save</button>
+              <button class="sharePostBtn" data-id="${post.id}">📤 Share</button>
+            </div>
+          </div>
+        `).join('') || '<div class="glass-card" style="padding: 48px; text-align:center;">✨ No posts yet. Be the first to spark a discussion!</div>'}
+      </div>
+      <div class="loader" id="loader"><div class="spinner"></div></div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+    document.getElementById('createPostBtn')?.addEventListener('click', () => openPostModal());
+    document.querySelectorAll('.likePostBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleLikePost(btn.dataset.id); }));
+    document.querySelectorAll('.commentTriggerBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openCommentModal(btn.dataset.id); }));
+    document.querySelectorAll('.deletePostBtn')?.forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); adminDeletePost(btn.dataset.id); }));
+    document.querySelectorAll('.sharePostBtn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/post/${btn.dataset.id}`); showToast('Link copied!'); }));
+  }
+  
+  async function openPostModal() {
+    if (!currentUser) return alert("Please login to share ideas");
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal active';
+    modalDiv.innerHTML = `
+      <div class="modal-content"><h3>💡 Share your insight</h3>
+        <input id="postTitle" placeholder="Title" style="width:100%; margin: 12px 0;">
+        <textarea id="postContent" rows="4" placeholder="Describe problem, startup concept, tech discussion..." style="width:100%"></textarea>
+        <select id="postCategory"><option>Technology</option><option>Startups</option><option>Business Ideas</option><option>AI & ML</option><option>Programming</option></select>
+        <input id="postTags" placeholder="Tags (comma separated)" style="width:100%; margin: 12px 0;">
+        <input type="file" id="postImages" multiple accept="image/*" style="margin: 12px 0;">
+        <div id="imagePreviewContainer" class="image-preview"></div>
+        <div style="margin-top:24px; display:flex; gap:12px;"><button id="submitPostBtn" class="btn-primary">Publish</button><button id="closeModalBtn" class="btn-outline">Cancel</button></div>
+      </div>`;
+    document.body.appendChild(modalDiv);
+    
+    document.getElementById('postImages').addEventListener('change', (e) => {
+      const container = document.getElementById('imagePreviewContainer');
+      container.innerHTML = '';
+      Array.from(e.target.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => { container.innerHTML += `<img src="${e.target.result}" style="width: 80px; height: 80px;">`; };
+        reader.readAsDataURL(file);
+      });
+    });
+    
+    document.getElementById('submitPostBtn').onclick = async () => {
+      const images = Array.from(document.getElementById('postImages').files);
+      await createPost(
+        document.getElementById('postTitle').value,
+        document.getElementById('postContent').value,
+        document.getElementById('postCategory').value,
+        document.getElementById('postTags').value,
+        images
+      );
+      modalDiv.remove();
+      renderCurrentView();
+      showToast('Post published successfully!');
+    };
+    document.getElementById('closeModalBtn').onclick = () => modalDiv.remove();
+  }
+  
+  async function openCommentModal(postId) {
+    const { data: comments } = await supabase.from('comments').select('*, profiles(fullname, avatar_url)').eq('post_id', postId).order('created_at', { ascending: true });
+    
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal active';
+    modalDiv.innerHTML = `
+      <div class="modal-content"><h4>💬 Discussion</h4>
+        <div id="commentListContainer" style="max-height: 400px; overflow-y: auto; margin: 16px 0;">
+          ${comments?.map(c => `
+            <div style="padding: 12px 0; border-bottom: 1px solid #ddd;">
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <img src="${c.profiles?.avatar_url || 'https://ui-avatars.com/api/?background=2D4BFF&color=fff&name='+c.profiles?.fullname}" style="width: 32px; height: 32px; border-radius: 50%;">
+                <b>${sanitizeHTML(c.profiles?.fullname)}</b> <small>${new Date(c.created_at).toLocaleString()}</small>
+              </div>
+              <p style="margin-top: 8px;">${sanitizeHTML(c.content)}</p>
+            </div>
+          `).join('') || '<i>No comments yet</i>'}
+        </div>
+        <textarea id="commentText" placeholder="Write your reply..." rows="2" style="width:100%"></textarea>
+        <div style="margin-top: 16px; display: flex; gap: 12px;"><button id="postCommentBtn" class="btn-primary">Reply</button><button id="closeCommentModalBtn" class="btn-outline">Close</button></div>
+      </div>`;
+    document.body.appendChild(modalDiv);
+    document.getElementById('postCommentBtn').onclick = async () => {
+      const text = document.getElementById('commentText').value;
+      if (!text) return;
+      await addComment(postId, text);
+      modalDiv.remove();
+      openCommentModal(postId);
+    };
+    document.getElementById('closeCommentModalBtn').onclick = () => modalDiv.remove();
+  }
+  
+  async function renderDashboard() {
+    if (!currentUser) { renderHome(); return; }
+    const { data: myPosts } = await supabase.from('posts').select('*').eq('author_id', currentUser.id);
+    const { data: notifications } = await supabase.from('notifications').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
+    
+    const html = `
+      <div class="glass-card" style="padding: 32px; margin: 24px 0;">
+        <div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: center;">
+          <img src="${currentUser.avatar_url || 'https://ui-avatars.com/api/?background=2D4BFF&color=fff&name='+currentUser.fullname}" style="width: 80px; height: 80px; border-radius: 50%;">
+          <div><h2>${sanitizeHTML(currentUser.fullname)}</h2><p>@${currentUser.username} · Joined ${new Date(currentUser.join_date).toLocaleDateString()}</p><p>${currentUser.bio || 'Passionate about technology and innovation'}</p><button id="editProfileBtnDash" class="btn-outline">✏️ Edit Profile</button></div>
+        </div>
+      </div>
+      <h3>📌 My Posts (${myPosts?.length || 0})</h3>
+      <div class="grid-posts">${myPosts?.map(p => `<div class="post-card glass-card"><b>${sanitizeHTML(p.title)}</b><br>❤️ ${p.likes_count || 0} likes | 💬 ${p.comments_count || 0} comments</div>`).join('') || '<p>No posts yet.</p>'}</div>
+      <h3>🔔 Notifications</h3>
+      <div class="glass-card" style="padding: 20px;">
+        ${notifications?.map(n => `<div style="padding: 10px; border-bottom: 1px solid #ddd;"><small>${new Date(n.created_at).toLocaleString()}</small><br>${sanitizeHTML(n.content)}</div>`).join('') || '<p>No notifications yet.</p>'}
+      </div>
+    `;
+    document.getElementById('mainContent').innerHTML = html;
+    document.getElementById('editProfileBtnDash')?.addEventListener('click', () => openProfileModal());
+  }
+  
+  function openProfileModal() {
+    if (!currentUser) return;
+    const modal = document.createElement('div'); modal.className = 'modal active';
+    modal.innerHTML = `<div class="modal-content"><h3>Edit Profile</h3><input id="fullnameEdit" placeholder="Full Name" value="${currentUser.fullname || ''}"><input id="usernameEdit" placeholder="Username" value="${currentUser.username || ''}"><textarea id="bioEdit" placeholder="Bio">${currentUser.bio || ''}</textarea><input id="locationEdit" placeholder="Location" value="${currentUser.location || ''}"><input id="skillsEdit" placeholder="Skills (comma separated)" value="${currentUser.skills || ''}"><input id="websiteEdit" placeholder="Website URL" value="${currentUser.website || ''}"><input type="file" id="avatarUpload" accept="image/*"><div style="margin-top:20px;"><button id="saveProfileBtn" class="btn-primary">Save</button><button id="closeModalBtnProfile" class="btn-outline">Cancel</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('saveProfileBtn').onclick = async () => {
+      let avatarUrl = currentUser.avatar_url;
+      const avatarFile = document.getElementById('avatarUpload').files[0];
+      if (avatarFile) {
+        const fileName = `${currentUser.id}/avatar_${Date.now()}.jpg`;
+        await supabase.storage.from('avatars').upload(fileName, avatarFile);
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+        avatarUrl = publicUrl;
+      }
+      await supabase.from('profiles').update({
+        fullname: document.getElementById('fullnameEdit').value,
+        username: document.getElementById('usernameEdit').value,
+        bio: document.getElementById('bioEdit').value,
+        location: document.getElementById('locationEdit').value,
+        skills: document.getElementById('skillsEdit').value.split(','),
+        website: document.getElementById('websiteEdit').value,
+        avatar_url: avatarUrl
+      }).eq('id', currentUser.id);
+      await loadUserProfile(currentUser.id);
+      modal.remove();
+      renderCurrentView();
+      showToast('Profile updated!');
+    };
+    document.getElementById('closeModalBtnProfile').onclick = () => modal.remove();
+  }
+  
+  function renderAbout() {
+    document.getElementById('mainContent').innerHTML = `
+      <div class="glass-card" style="padding: 48px; margin: 40px 0;">
+        <h1>🚀 Kasturag Tech — Innovation Hub</h1>
+        <p style="margin: 24px 0; font-size: 1.1rem;">Kasturag Tech is a cutting-edge software development company specializing in <strong>Web Development, Cloud Solutions, AI, and Digital Transformation</strong>. IdeaHub Community is our flagship platform fostering tech entrepreneurship and collaboration.</p>
+        <div class="brand-badge" style="margin: 20px auto;">⭐ Platform Developed and Maintained by Kasturag Tech ⭐</div>
+        <h3>💼 Need a Website or Software?</h3>
+        <p>We build scalable web apps, mobile solutions, business automation, and AI-driven products. Let's bring your vision to life.</p>
+        <div style="margin-top: 24px;">
+          <button class="btn-primary" onclick="alert('📧 Contact: hello@kasturagtech.com | 🌐 kasturagtech.com')">Contact Kasturag Tech</button>
+        </div>
+      </div>`;
+  }
+  
+  function renderCurrentView() {
+    if (currentView === 'home') renderHome();
+    else if (currentView === 'about') renderAbout();
+    else if (currentView === 'dashboard') renderDashboard();
+  }
+  
+  // Auth Modal
+  function openAuthModal() {
+    const modalDiv = document.createElement('div'); modalDiv.className = 'modal active';
+    modalDiv.innerHTML = `<div class="modal-content"><h2>Welcome to IdeaHub</h2><div style="display:flex; gap:12px; margin-bottom: 16px;"><button id="showLoginBtn" class="btn-outline">Login</button><button id="showSignupBtn" class="btn-outline">Sign Up</button></div><div id="dynamicAuthForm"><input id="loginEmail" placeholder="Email"><input id="loginPassword" placeholder="Password" type="password"><button id="doLoginAction" class="btn-primary">Login</button></div><button id="closeAuthModalBtn" class="btn-outline" style="margin-top: 12px;">Close</button></div>`;
+    document.body.appendChild(modalDiv);
+    const updateForm = (type) => {
+      if (type === 'login') document.getElementById('dynamicAuthForm').innerHTML = `<input id="loginEmail" placeholder="Email"><input id="loginPassword" placeholder="Password" type="password"><button id="doLoginAction" class="btn-primary">Login</button><button id="forgotPwdBtn" style="background:none;">Forgot password?</button>`;
+      else document.getElementById('dynamicAuthForm').innerHTML = `<input id="signupName" placeholder="Full Name"><input id="signupEmail" placeholder="Email"><input id="signupUsername" placeholder="Username"><input id="signupPassword" placeholder="Password" type="password"><button id="doSignupAction" class="btn-primary">Create Account</button>`;
+      attachEvents();
+    };
+    const attachEvents = () => {
+      document.getElementById('doLoginAction')?.addEventListener('click', async () => { try { await signIn(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); modalDiv.remove(); renderCurrentView(); showToast('Welcome back!'); } catch(e) { alert(e.message); } });
+      document.getElementById('doSignupAction')?.addEventListener('click', async () => { try { await signUp(document.getElementById('signupEmail').value, document.getElementById('signupPassword').value, document.getElementById('signupName').value, document.getElementById('signupUsername').value); modalDiv.remove(); alert('Verification email sent! Please verify your email.'); } catch(e) { alert(e.message); } });
+      document.getElementById('forgotPwdBtn')?.addEventListener('click', async () => { const email = prompt('Enter your email'); if(email) { await resetPassword(email); alert('Password reset link sent!'); } });
+    };
+    document.getElementById('showLoginBtn').onclick = () => updateForm('login');
+    document.getElementById('showSignupBtn').onclick = () => updateForm('signup');
+    document.getElementById('closeAuthModalBtn').onclick = () => modalDiv.remove();
+    updateForm('login');
+  }
+  
+  // Event Listeners
+  document.getElementById('authBtn').addEventListener('click', () => currentUser ? signOut() : openAuthModal());
+  document.getElementById('homeNavBtn').addEventListener('click', () => { currentView = 'home'; renderCurrentView(); });
+  document.getElementById('aboutNavBtn').addEventListener('click', () => { currentView = 'about'; renderCurrentView(); });
+  document.getElementById('dashboardNavBtn').addEventListener('click', () => { if(currentUser) currentView = 'dashboard'; else alert("Please login"); renderCurrentView(); });
+  document.getElementById('themeToggleBtn').addEventListener('click', () => document.body.classList.toggle('dark'));
+  document.getElementById('notificationsBtn').addEventListener('click', () => { if(currentUser) { currentView = 'dashboard'; renderCurrentView(); } else alert('Login to see notifications'); });
+  
+  renderMarketing();
+</script>
+</body>
+</html>
