@@ -431,7 +431,7 @@
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
     
     if (data && !error) {
       currentUser = { id: userId, ...data };
@@ -447,7 +447,7 @@
           bio: 'Passionate about technology and innovation'
         })
         .select()
-        .single();
+        .maybeSingle();
       currentUser = newProfile;
     }
     updateNotificationBadge();
@@ -546,7 +546,7 @@
       .select()
       .eq('post_id', postId)
       .eq('user_id', currentUser.id)
-      .single();
+      .maybeSingle();
     
     if (existing) {
       await supabase.from('likes').delete().eq('id', existing.id);
@@ -562,7 +562,7 @@
       await supabase.rpc('increment_post_likes', { post_id: postId });
       
       // Create notification
-      const { data: post } = await supabase.from('posts').select('author_id, title').eq('id', postId).single();
+      const { data: post } = await supabase.from('posts').select('author_id, title').eq('id', postId).maybeSingle();
       if (post && post.author_id !== currentUser.id) {
         await supabase.from('notifications').insert({
           user_id: post.author_id,
@@ -594,7 +594,7 @@
     if (!error) {
       await supabase.rpc('increment_post_comments', { post_id: postId });
       
-      const { data: post } = await supabase.from('posts').select('author_id, title').eq('id', postId).single();
+      const { data: post } = await supabase.from('posts').select('author_id, title').eq('id', postId).maybeSingle();
       if (post && post.author_id !== currentUser.id) {
         await supabase.from('notifications').insert({
           user_id: post.author_id,
