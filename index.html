@@ -855,8 +855,39 @@
     document.getElementById('createPostBtn')?.addEventListener('click', () => alert('Post creation integrated (original logic preserved)'));
   }
   
-  async function toggleLike(postId) { if (!currentUser) { showToast('Login to like'); return; } const { data: existing } = await supabase.from('likes').select().eq('post_id', postId).eq('user_id', currentUser.id).maybeSingle(); if (existing) await supabase.from('likes').delete().eq('id', existing.id); else await supabase.from('likes').insert({ post_id: postId, user_id: currentUser.id, target_type: 'post', target_id: postId }); renderHome(); }
-  
+async function toggleLike(postId) {
+  if (!currentUser) {
+    showToast('Login to like');
+    return;
+  }
+
+  // check existing like (correct schema)
+  const { data: existing } = await supabase
+    .from('likes')
+    .select('*')
+    .eq('target_id', postId)
+    .eq('target_type', 'post')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+
+  // IF EXISTS → UNLIKE
+  if (existing) {
+    await supabase
+      .from('likes')
+      .delete()
+      .eq('id', existing.id);
+  } 
+  // ELSE → LIKE
+  else {
+    await supabase.from('likes').insert({
+      target_id: postId,
+      target_type: 'post',
+      user_id: currentUser.id
+    });
+  }
+
+  renderHome();
+}  
   function updateAuthUI() { const authBtn = document.getElementById('authBtn'); if (currentUser) { authBtn.innerHTML = `👤 ${currentUser.fullname?.split(' ')[0]}`; document.getElementById('dashboardNavBtn').style.display = 'inline-block'; } else { authBtn.innerHTML = 'Sign In'; document.getElementById('dashboardNavBtn').style.display = 'none'; } }
   
   function renderMarketing() { document.getElementById('marketingSection').innerHTML = `<div class="marketing-banner glass-card" style="padding:32px;text-align:center;"><h3>🚀 Kasturag Tech Solutions</h3><button class="btn-primary" onclick="alert('Contact: kasturagtech@gmail.com')">Contact Us</button></div>`; }
