@@ -24,7 +24,7 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Font Awesome 6 (free) -->
+  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
   <style>
@@ -42,7 +42,6 @@
       color: #eef2ff;
     }
     
-    /* Glassmorphism Core */
     .glass-card, nav, .card, .modal-content, .marketing-banner, .brand-badge, .post-card, .profile-card, .comment-card {
       background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(12px);
@@ -64,7 +63,6 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
     }
     
-    /* Button Styles */
     .btn-primary {
       background: linear-gradient(135deg, #2D4BFF, #7C3AFF);
       border: none;
@@ -101,7 +99,7 @@
       background: linear-gradient(135deg, #ef4444, #dc2626);
       border: none;
       color: white;
-      padding: 10px 18px;
+      padding: 8px 16px;
       border-radius: 40px;
       font-weight: 600;
       cursor: pointer;
@@ -113,7 +111,11 @@
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
     
-    /* Modal Styles */
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 0.85rem;
+    }
+    
     .modal {
       position: fixed;
       top: 0;
@@ -145,7 +147,6 @@
       border-radius: 32px;
     }
     
-    /* Form Elements */
     input, textarea, select {
       width: 100%;
       padding: 14px 18px;
@@ -170,7 +171,6 @@
       box-shadow: 0 0 0 3px rgba(45, 75, 255, 0.1);
     }
     
-    /* Post Cards */
     .post-card {
       padding: 24px;
       cursor: pointer;
@@ -190,7 +190,6 @@
       object-fit: cover;
     }
     
-    /* Notification Bell */
     .notification-bell {
       position: relative;
       cursor: pointer;
@@ -214,7 +213,6 @@
       min-width: 18px;
     }
     
-    /* Layout */
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -270,10 +268,6 @@
       margin-right: 8px;
     }
     
-    body.dark .category-tag {
-      background: rgba(45, 75, 255, 0.3);
-    }
-    
     .trending-badge {
       background: linear-gradient(135deg, #f59e0b, #ef4444);
       color: white;
@@ -284,7 +278,6 @@
       margin-left: 12px;
     }
     
-    /* Toast Notifications */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -304,7 +297,6 @@
       to { transform: translateX(0); opacity: 1; }
     }
     
-    /* Responsive */
     @media (max-width: 768px) {
       nav { margin: 12px; padding: 12px 20px; }
       .grid-posts { grid-template-columns: 1fr; }
@@ -312,7 +304,6 @@
       .logo { font-size: 1.3rem; }
     }
     
-    /* Comment Threads */
     .comment-item {
       transition: all 0.2s ease;
       animation: fadeInUp 0.3s ease;
@@ -332,17 +323,11 @@
     .footer { text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 1px solid rgba(0, 0, 0, 0.05); }
     body.dark .footer { border-top-color: rgba(255, 255, 255, 0.05); }
     
-    .post-content-markdown {
-      line-height: 1.6;
-      word-break: break-word;
-    }
-    .post-content-markdown pre {
-      background: #1e1e2e;
-      padding: 12px;
-      border-radius: 12px;
-      overflow-x: auto;
-      color: #e2e8f0;
-    }
+    .post-content-markdown { line-height: 1.6; word-break: break-word; }
+    .post-content-markdown pre { background: #1e1e2e; padding: 12px; border-radius: 12px; overflow-x: auto; color: #e2e8f0; }
+    
+    .comment-actions { display: flex; gap: 8px; }
+    .edited-badge { font-size: 0.7rem; color: #888; margin-left: 8px; font-style: italic; }
   </style>
 </head>
 <body>
@@ -361,7 +346,7 @@
       <button id="techNavBtn" class="btn-outline"><i class="fas fa-code"></i> Tech</button>
       <button id="aboutNavBtn" class="btn-outline"><i class="fas fa-info-circle"></i> About</button>
       <button id="dashboardNavBtn" class="btn-outline" style="display: none;"><i class="fas fa-chart-line"></i> Dashboard</button>
-      <button id="notificationsBtn" class="notification-bell" aria-label="Notifications"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;">0</span></button>
+      <button id="notificationsBtn" class="notification-bell"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;">0</span></button>
       <button id="authBtn" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Sign In</button>
       <button id="themeToggleBtn" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;"><i class="fas fa-moon"></i></button>
     </div>
@@ -369,7 +354,7 @@
 
   <div class="container">
     <div class="brand-badge" style="background: linear-gradient(95deg, #2D4BFF15, #B842FF15); text-align: center; margin: 8px auto 20px; padding: 12px 24px; border-radius: 60px;">
-      <i class="fas fa-shield-alt"></i> <strong>Platform Developed and Maintained by Kasturag Tech</strong> | Enterprise-Grade Security | Share Problems & Ideas
+      <i class="fas fa-shield-alt"></i> <strong>Platform by Kasturag Tech</strong> | Edit/Delete Your Own Posts & Comments
     </div>
   </div>
 
@@ -377,23 +362,17 @@
   <div class="container" id="marketingSection"></div>
 
   <footer class="footer">
-    <p>© 2026 put idea · Developed and Managed by Kasturag Tech · All Rights Reserved.</p>
-    <div class="brand-badge" style="display: inline-block; margin-top: 12px; padding: 8px 20px;"><i class="fas fa-crown"></i> Built by Kasturag Tech — Innovating Digital Future</div>
-    <div style="margin-top: 16px; display: flex; gap: 20px; justify-content: center;">
-      <a href="#" style="color: #2D4BFF; text-decoration: none;"><i class="fas fa-globe"></i> Website</a>
-      <a href="mailto:hello@kasturagtech.com" style="color: #2D4BFF; text-decoration: none;"><i class="fas fa-envelope"></i> Email</a>
-    </div>
+    <p>© 2026 put idea · Developed by Kasturag Tech · All Rights Reserved.</p>
+    <div class="brand-badge" style="display: inline-block; margin-top: 12px; padding: 8px 20px;"><i class="fas fa-crown"></i> Built by Kasturag Tech</div>
   </footer>
 </div>
 
 <script>
-  // Supabase Configuration
   const SUPABASE_URL = 'https://gmoguqputgiickghlury.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_wOsMLlLmESUnXpkEeM9rog_B764NhS8';
   
   let supabase;
   let currentUser = null;
-  let currentSession = null;
   let currentFilter = 'all';
   let currentView = 'home';
   
@@ -403,7 +382,7 @@
     if (session) await loadUserProfile(session.user.id);
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) await loadUserProfile(session.user.id);
-      else { currentUser = null; currentSession = null; }
+      else { currentUser = null; }
       updateAuthUI();
       renderCurrentView();
     });
@@ -416,31 +395,116 @@
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
     if (data) currentUser = { id: userId, ...data };
     else {
-      const { data: newProfile } = await supabase.from('profiles').insert({ id: userId, fullname: 'Innovator', username: `creator_${userId.slice(0,6)}`, join_date: new Date(), bio: 'Passionate problem solver' }).select().maybeSingle();
+      const { data: newProfile } = await supabase.from('profiles').insert({ 
+        id: userId, fullname: 'Innovator', username: `creator_${userId.slice(0,6)}`, 
+        join_date: new Date(), bio: 'Passionate problem solver' 
+      }).select().maybeSingle();
       currentUser = newProfile;
     }
-    updateNotificationBadge();
   }
   
   function sanitizeHTML(str) { return DOMPurify.sanitize(str || '', { ALLOWED_TAGS: ['b','i','em','strong','a','p','br','pre','code','ul','li','ol'], ALLOWED_ATTR: ['href','target'] }); }
-  function showToast(msg, type = 'success') { const toast = document.createElement('div'); toast.className = 'toast'; toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000); }
+  function showToast(msg, type = 'success') { 
+    const toast = document.createElement('div'); 
+    toast.className = 'toast'; 
+    toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`; 
+    document.body.appendChild(toast); 
+    setTimeout(() => toast.remove(), 3000); 
+  }
   
+  // ============ POST CREATE ============
   async function openCreatePostModal() {
-    if (!currentUser) { showToast('Please sign in to share ideas', 'error'); openAuthModal(); return; }
+    if (!currentUser) { showToast('Please sign in', 'error'); openAuthModal(); return; }
     const modal = document.createElement('div'); modal.className = 'modal active';
-    modal.innerHTML = `<div class="modal-content"><h2><i class="fas fa-pen-fancy"></i> Share Your Idea/Problem</h2>
-      <input type="text" id="postTitle" placeholder="Title *" maxlength="150"><select id="postCategory"><option>Technology</option><option>Startups</option><option>Business Ideas</option><option>AI & ML</option><option>Programming</option><option>Career</option></select>
-      <textarea id="postContent" rows="6" placeholder="Describe your problem or idea in detail... Markdown supported"></textarea>
-      <div style="display:flex; gap:12px; margin-top:20px;"><button id="submitPostBtn" class="btn-primary">🚀 Publish</button><button id="cancelPostBtn" class="btn-outline">Cancel</button></div></div>`;
+    modal.innerHTML = `<div class="modal-content"><h2><i class="fas fa-pen-fancy"></i> Share Your Idea</h2>
+      <input type="text" id="postTitle" placeholder="Title *" maxlength="150">
+      <select id="postCategory"><option>Technology</option><option>Startups</option><option>Business Ideas</option><option>AI & ML</option><option>Programming</option><option>Career</option><option>Problems</option><option>Ideas</option></select>
+      <textarea id="postContent" rows="6" placeholder="Describe in detail... Markdown supported"></textarea>
+      <div style="display:flex; gap:12px; margin-top:20px;"><button id="submitPostBtn" class="btn-primary">Publish</button><button id="cancelPostBtn" class="btn-outline">Cancel</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('submitPostBtn').onclick = async () => {
       const title = document.getElementById('postTitle').value.trim();
       const content = document.getElementById('postContent').value.trim();
       if(!title) { showToast('Title required', 'error'); return; }
-      const { error } = await supabase.from('posts').insert({ title, content, category: document.getElementById('postCategory').value, author_id: currentUser.id, is_draft: false });
-      if(error) showToast(error.message, 'error'); else { showToast('Posted!'); modal.remove(); renderCurrentView(); }
+      const { error } = await supabase.from('posts').insert({ 
+        title, content, category: document.getElementById('postCategory').value, 
+        author_id: currentUser.id, is_draft: false 
+      });
+      if(error) showToast(error.message, 'error'); 
+      else { showToast('Posted!'); modal.remove(); renderCurrentView(); }
     };
     document.getElementById('cancelPostBtn').onclick = () => modal.remove();
+  }
+  
+  // ============ EDIT POST ============
+  async function editPost(postId, oldTitle, oldContent, oldCategory) {
+    if (!currentUser) { showToast('Login required', 'error'); return; }
+    const modal = document.createElement('div'); modal.className = 'modal active';
+    modal.innerHTML = `<div class="modal-content"><h2><i class="fas fa-edit"></i> Edit Post</h2>
+      <input id="editTitle" value="${sanitizeHTML(oldTitle)}">
+      <select id="editCategory">
+        <option ${oldCategory==='Technology'?'selected':''}>Technology</option>
+        <option ${oldCategory==='Startups'?'selected':''}>Startups</option>
+        <option ${oldCategory==='Business Ideas'?'selected':''}>Business Ideas</option>
+        <option ${oldCategory==='AI & ML'?'selected':''}>AI & ML</option>
+        <option ${oldCategory==='Programming'?'selected':''}>Programming</option>
+        <option ${oldCategory==='Career'?'selected':''}>Career</option>
+      </select>
+      <textarea id="editContent" rows="6">${sanitizeHTML(oldContent)}</textarea>
+      <div style="display:flex;gap:10px;margin-top:20px;"><button id="saveEditBtn" class="btn-primary">Save Changes</button><button id="closeEditBtn" class="btn-outline">Cancel</button></div></div>`;
+    document.body.appendChild(modal);
+    document.getElementById('closeEditBtn').onclick = () => modal.remove();
+    document.getElementById('saveEditBtn').onclick = async () => {
+      const title = document.getElementById('editTitle').value;
+      const content = document.getElementById('editContent').value;
+      const category = document.getElementById('editCategory').value;
+      const { error } = await supabase.from('posts').update({ 
+        title, content, category, updated_at: new Date() 
+      }).eq('id', postId).eq('author_id', currentUser.id);
+      if(error){ showToast(error.message,'error'); return; }
+      showToast('Post updated successfully');
+      modal.remove();
+      renderCurrentView();
+    };
+  }
+  
+  // ============ DELETE POST ============
+  async function deletePost(postId) {
+    if(!currentUser) return;
+    const confirmed = confirm('⚠️ Delete this post permanently? This cannot be undone.');
+    if(!confirmed) return;
+    const { error } = await supabase.from('posts').delete().eq('id', postId).eq('author_id', currentUser.id);
+    if(error){ showToast(error.message,'error'); return; }
+    showToast('Post deleted');
+    renderCurrentView();
+  }
+  
+  // ============ EDIT COMMENT ============
+  async function editComment(commentId, currentContent) {
+    if (!currentUser) { showToast('Login required', 'error'); return; }
+    const newContent = prompt('Edit your comment:', currentContent);
+    if (!newContent || newContent.trim() === '') return;
+    const { error } = await supabase.from('comments').update({ 
+      content: sanitizeHTML(newContent), edited_at: new Date() 
+    }).eq('id', commentId).eq('user_id', currentUser.id);
+    if(error) showToast(error.message, 'error');
+    else { showToast('Comment updated'); renderCurrentView(); }
+  }
+  
+  // ============ DELETE COMMENT ============
+  async function deleteComment(commentId, postId) {
+    if(!currentUser) return;
+    const confirmed = confirm('Delete this comment?');
+    if(!confirmed) return;
+    const { error } = await supabase.from('comments').delete().eq('id', commentId).eq('user_id', currentUser.id);
+    if(error) showToast(error.message, 'error');
+    else {
+      try {
+        await supabase.rpc('increment_post_comments', { post_id: postId, inc_amount: -1 });
+      } catch(e) { console.warn(e); }
+      showToast('Comment deleted');
+      renderCurrentView();
+    }
   }
   
   async function fetchPosts(filter = 'all') {
@@ -460,107 +524,107 @@
     renderHome();
   }
   
-  async function deletePost(postId) {
-    if(!currentUser) return;
-    const confirmed = confirm('Delete this post permanently?');
-    if(!confirmed) return;
-    const { error } = await supabase.from('posts').delete().eq('id', postId).eq('author_id', currentUser.id);
-    if(error){ showToast(error.message,'error'); return; }
-    showToast('Post deleted');
-    renderCurrentView();
-  }
-  
-  async function editPost(postId, oldTitle, oldContent, oldCategory) {
-    const modal = document.createElement('div');
-    modal.className = 'modal active';
-    modal.innerHTML = `<div class="modal-content"><h2>✏️ Edit Post</h2>
-      <input id="editTitle" value="${sanitizeHTML(oldTitle)}">
-      <select id="editCategory">
-        <option ${oldCategory==='Technology'?'selected':''}>Technology</option>
-        <option ${oldCategory==='Startups'?'selected':''}>Startups</option>
-        <option ${oldCategory==='Business Ideas'?'selected':''}>Business Ideas</option>
-        <option ${oldCategory==='AI & ML'?'selected':''}>AI & ML</option>
-        <option ${oldCategory==='Programming'?'selected':''}>Programming</option>
-        <option ${oldCategory==='Career'?'selected':''}>Career</option>
-      </select>
-      <textarea id="editContent" rows="6">${sanitizeHTML(oldContent)}</textarea>
-      <div style="display:flex;gap:10px;margin-top:20px;"><button id="saveEditBtn" class="btn-primary">Save</button><button id="closeEditBtn" class="btn-outline">Cancel</button></div></div>`;
-    document.body.appendChild(modal);
-    document.getElementById('closeEditBtn').onclick = () => modal.remove();
-    document.getElementById('saveEditBtn').onclick = async () => {
-      const title = document.getElementById('editTitle').value;
-      const content = document.getElementById('editContent').value;
-      const category = document.getElementById('editCategory').value;
-      const { error } = await supabase.from('posts').update({ title, content, category, updated_at: new Date() }).eq('id', postId);
-      if(error){ showToast(error.message,'error'); return; }
-      showToast('Post Updated');
-      modal.remove();
-      renderCurrentView();
-    };
-  }
-  
-  async function openPostDetail(postId) {
-    const { data: post } = await supabase.from('posts').select('*, profiles(fullname, avatar_url)').eq('id', postId).single();
-    if(!post) return;
-    const modal = document.createElement('div'); modal.className = 'modal active';
-    modal.innerHTML = `<div class="modal-content" style="max-width:700px;"><h2><i class="fas fa-newspaper"></i> ${sanitizeHTML(post.title)}</h2><div class="category-tag">${post.category}</div><div class="post-content-markdown" style="margin:16px 0;">${marked.parse(post.content || '')}</div><hr><h3><i class="fas fa-comments"></i> Discussions (${post.comments_count||0})</h3><div id="commentsDetailList" style="max-height:400px;overflow-y:auto;margin:16px 0;"></div><textarea id="newCommentText" rows="3" placeholder="Share your insight..."></textarea><div style="display:flex;gap:12px;margin-top:16px;"><button id="postCommentDetailBtn" class="btn-primary">💬 Post</button><button id="closeDetailBtn" class="btn-outline">Close</button></div></div>`;
-    document.body.appendChild(modal);
-    await loadCommentsForDetail(postId);
-    document.getElementById('postCommentDetailBtn').onclick = async () => { const txt = document.getElementById('newCommentText').value.trim(); if(txt && currentUser) await addComment(postId, txt, true); else showToast('Login or write comment','error'); };
-    document.getElementById('closeDetailBtn').onclick = () => modal.remove();
-  }
-  
-  async function loadCommentsForDetail(postId) {
-    const { data: comments } = await supabase.from('comments').select('*, profiles(fullname, avatar_url), edited_at').eq('post_id', postId).is('parent_id', null).order('created_at', { ascending: false });
-    const container = document.getElementById('commentsDetailList');
-    if(!container) return;
-    container.innerHTML = comments?.map(c => `<div class="comment-item" data-cid="${c.id}"><div style="display:flex;justify-content:space-between;align-items:center;"><div><img src="${c.profiles?.avatar_url||`https://ui-avatars.com/api/?name=${c.profiles?.fullname}`}" style="width:32px;height:32px;border-radius:50%;margin-right:8px;"><b>${c.profiles?.fullname}</b> <small>${new Date(c.created_at).toLocaleString()}</small>${c.edited_at?' <i class="fas fa-edit" style="font-size:12px;"></i>':''}</div>${currentUser && (currentUser.id===c.user_id) ? `<button class="edit-comment-btn btn-outline" style="padding:4px 12px;" data-id="${c.id}" data-content="${sanitizeHTML(c.content)}">Edit</button>` : ''}</div><p style="margin-top:10px;">${sanitizeHTML(c.content)}</p></div>`).join('') || '<div class="glass-card" style="padding:20px;">✨ No comments yet. Start the conversation!</div>';
-    document.querySelectorAll('.edit-comment-btn').forEach(btn => btn.addEventListener('click', async (e) => { e.stopPropagation(); const cid = btn.dataset.id, old = btn.dataset.content; const newC = prompt('Edit comment:', old); if(newC && newC.trim()) { await supabase.from('comments').update({ content: newC, edited_at: new Date() }).eq('id', cid); loadCommentsForDetail(postId); showToast('Comment updated'); } }));
-  }
-  
-  async function addComment(postId, content, refreshModal=true) {
+  async function addComment(postId, content) {
     if(!currentUser) { showToast('Login to comment', 'error'); openAuthModal(); return; }
-    const { error } = await supabase.from('comments').insert({ post_id: postId, user_id: currentUser.id, content: sanitizeHTML(content), parent_id: null });
+    if(!content.trim()) return;
+    const { error } = await supabase.from('comments').insert({ 
+      post_id: postId, user_id: currentUser.id, content: sanitizeHTML(content), parent_id: null 
+    });
     if(!error) { 
       await supabase.rpc('increment_post_comments', { post_id: postId });
       showToast('Comment added');
-      if(refreshModal) loadCommentsForDetail(postId);
-      else renderHome();
+      renderHome();
     } else showToast(error.message, 'error');
   }
   
   async function renderHome() {
     const posts = await fetchPosts(currentFilter);
     const categoryMap = { all:'All', Technology:'Tech', Startups:'Startups', 'Business Ideas':'Business', 'AI & ML':'AI/ML', Programming:'Code', Career:'Career', Problems:'⚠️ Problems', Ideas:'💡 Ideas' };
-    const html = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:24px 0;"><div><h1 style="font-size:2rem;"><i class="fas fa-comments"></i> Community Exchange</h1><p>Share challenges, unlock solutions</p></div><button id="createPostBtn" class="btn-primary"><i class="fas fa-plus-circle"></i> New Post</button></div>
+    
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:24px 0;">
+      <div><h1 style="font-size:2rem;"><i class="fas fa-comments"></i> Community Exchange</h1><p>Share challenges, unlock solutions</p></div>
+      <button id="createPostBtn" class="btn-primary"><i class="fas fa-plus-circle"></i> New Post</button></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin:20px 0;">${Object.entries(categoryMap).map(([key,label]) => `<button class="filter-btn ${currentFilter===key?'btn-primary':'btn-outline'}" data-filter="${key}">${label}</button>`).join('')}</div>
-      <div class="grid-posts" id="postsGrid">${posts.length ? posts.map(post => {
-        const isOwner = currentUser && currentUser.id === post.author_id;
-        const isTrending = (post.likes_count || 0) >= 5;
-        return `<div class="post-card glass-card" data-postid="${post.id}">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div style="display:flex;gap:12px;align-items:center;">
-              <img src="${post.profiles?.avatar_url || `https://ui-avatars.com/api/?background=2D4BFF&color=fff&name=${encodeURIComponent(post.profiles?.fullname || 'User')}`}" class="profile-img">
-              <div><b>${sanitizeHTML(post.profiles?.fullname || 'Anonymous')}</b><div><span class="category-tag"><i class="fas fa-tag"></i> ${post.category}</span><small> ${new Date(post.created_at).toLocaleDateString()}</small>${isTrending ? `<span class="trending-badge">🔥 Trending</span>` : ''}</div></div>
-            </div>${isOwner ? `<div style="display:flex;gap:8px;"><button class="editPostBtn btn-outline" data-id="${post.id}" data-title="${encodeURIComponent(post.title)}" data-content="${encodeURIComponent(post.content||'')}" data-category="${encodeURIComponent(post.category||'')}"><i class="fas fa-edit"></i></button><button class="deletePostBtn btn-danger" data-id="${post.id}"><i class="fas fa-trash"></i></button></div>` : ''}
+      <div class="grid-posts">`;
+    
+    for (const post of posts) {
+      const isOwner = currentUser && currentUser.id === post.author_id;
+      const isTrending = (post.likes_count || 0) >= 5;
+      
+      // Fetch comments for this post
+      const { data: comments } = await supabase.from('comments').select('*, profiles(fullname, avatar_url), edited_at').eq('post_id', post.id).is('parent_id', null).order('created_at', { ascending: true });
+      
+      html += `<div class="post-card glass-card" data-postid="${post.id}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <img src="${post.profiles?.avatar_url || `https://ui-avatars.com/api/?background=2D4BFF&color=fff&name=${encodeURIComponent(post.profiles?.fullname || 'User')}`}" class="profile-img">
+            <div><b>${sanitizeHTML(post.profiles?.fullname || 'Anonymous')}</b>
+              <div><span class="category-tag"><i class="fas fa-tag"></i> ${post.category}</span><small> ${new Date(post.created_at).toLocaleDateString()}</small>${isTrending ? `<span class="trending-badge">🔥 Trending</span>` : ''}</div>
+            </div>
           </div>
-          <h3 style="margin:14px 0;">${sanitizeHTML(post.title)}</h3>
-          <div class="post-content-markdown">${sanitizeHTML((post.content || '').substring(0,180))}${(post.content || '').length > 180 ? '...' : ''}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;padding-top:14px;border-top:1px solid rgba(0,0,0,0.08);">
-            <div style="display:flex;gap:20px;"><button class="likeBtn" data-id="${post.id}"><i class="far fa-heart"></i> <span>${post.likes_count || 0}</span></button><button class="commentBtn" data-id="${post.id}"><i class="far fa-comment-dots"></i> <span>${post.comments_count || 0}</span></button></div>
+          ${isOwner ? `<div style="display:flex;gap:8px;">
+            <button class="editPostBtn btn-outline btn-sm" data-id="${post.id}" data-title="${encodeURIComponent(post.title)}" data-content="${encodeURIComponent(post.content||'')}" data-category="${encodeURIComponent(post.category||'')}"><i class="fas fa-edit"></i> Edit</button>
+            <button class="deletePostBtn btn-danger btn-sm" data-id="${post.id}"><i class="fas fa-trash"></i> Del</button>
+          </div>` : ''}
+        </div>
+        <h3 style="margin:14px 0;">${sanitizeHTML(post.title)}</h3>
+        <div class="post-content-markdown">${marked.parse((post.content || '').substring(0,200))}${(post.content || '').length > 200 ? '...' : ''}</div>
+        
+        <!-- Comments Section -->
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.1);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+            <span><i class="fas fa-comments"></i> Comments (${post.comments_count || 0})</span>
+            <button class="addCommentBtn btn-outline btn-sm" data-id="${post.id}"><i class="fas fa-reply"></i> Add Comment</button>
+          </div>
+          <div id="comments-${post.id}" class="comments-container" style="max-height: 300px; overflow-y: auto;">
+            ${comments && comments.length ? comments.map(c => `
+              <div class="comment-item" style="margin-bottom: 12px; padding: 12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <img src="${c.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${c.profiles?.fullname}`}" style="width:28px;height:28px;border-radius:50%;margin-right:8px;">
+                    <b>${c.profiles?.fullname}</b>
+                    <small>${new Date(c.created_at).toLocaleString()}</small>
+                    ${c.edited_at ? `<span class="edited-badge"><i class="fas fa-edit"></i> edited</span>` : ''}
+                  </div>
+                  ${currentUser && currentUser.id === c.user_id ? `
+                    <div class="comment-actions">
+                      <button class="editCommentBtn btn-outline btn-sm" data-id="${c.id}" data-content="${sanitizeHTML(c.content)}"><i class="fas fa-edit"></i></button>
+                      <button class="deleteCommentBtn btn-danger btn-sm" data-id="${c.id}" data-postid="${post.id}"><i class="fas fa-trash"></i></button>
+                    </div>
+                  ` : ''}
+                </div>
+                <p style="margin-top: 8px;">${sanitizeHTML(c.content)}</p>
+              </div>
+            `).join('') : '<div style="padding: 12px; text-align: center; color: #888;">No comments yet. Be the first!</div>'}
+          </div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 12px;">
+          <div style="display:flex; gap:20px;">
+            <button class="likeBtn" data-id="${post.id}"><i class="far fa-heart"></i> <span>${post.likes_count || 0}</span></button>
             <button class="shareBtn" data-id="${post.id}"><i class="fas fa-share-alt"></i> Share</button>
           </div>
-        </div>`;
-      }).join('') : '<div class="glass-card" style="padding:60px;text-align:center;">✨ No posts yet. Be the first to share an idea!</div>'}</div>`;
+        </div>
+      </div>`;
+    }
+    
+    html += posts.length === 0 ? '<div class="glass-card" style="padding:60px;text-align:center;">✨ No posts yet. Be the first!</div>' : '';
+    html += `</div>`;
     document.getElementById('mainContent').innerHTML = html;
-    document.querySelectorAll('.commentBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); openPostDetail(btn.dataset.id); }));
+    
+    // Attach event listeners
     document.querySelectorAll('.likeBtn').forEach(btn => btn.addEventListener('click', async e => { e.stopPropagation(); await toggleLike(btn.dataset.id); }));
     document.querySelectorAll('.shareBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); navigator.clipboard.writeText(window.location.origin); showToast('Link copied!'); }));
     document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => { currentFilter = btn.dataset.filter; renderHome(); }));
     document.querySelectorAll('.editPostBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); editPost(btn.dataset.id, decodeURIComponent(btn.dataset.title), decodeURIComponent(btn.dataset.content), decodeURIComponent(btn.dataset.category)); }));
     document.querySelectorAll('.deletePostBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deletePost(btn.dataset.id); }));
+    document.querySelectorAll('.addCommentBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); 
+      const comment = prompt('Write your comment/solution:'); 
+      if(comment) addComment(btn.dataset.id, comment); 
+    }));
+    document.querySelectorAll('.editCommentBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); editComment(btn.dataset.id, btn.dataset.content); }));
+    document.querySelectorAll('.deleteCommentBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deleteComment(btn.dataset.id, btn.dataset.postid); }));
     document.getElementById('createPostBtn')?.addEventListener('click', openCreatePostModal);
-    document.querySelectorAll('.post-card').forEach(card => card.addEventListener('click', e => { if(e.target.closest('button')) return; openPostDetail(card.dataset.postid); }));
   }
   
   async function renderDashboard() {
@@ -569,22 +633,76 @@
     const { data: myPosts } = await supabase.from('posts').select('*').eq('author_id', currentUser.id).order('created_at', { ascending: false });
     const totalLikes = myPosts?.reduce((sum, p) => sum + (p.likes_count || 0), 0) || 0;
     const totalComments = myPosts?.reduce((sum, p) => sum + (p.comments_count || 0), 0) || 0;
-    const trendingCount = myPosts?.filter(p => (p.likes_count || 0) >= 5).length || 0;
-    document.getElementById('mainContent').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;"><div><h1><i class="fas fa-chart-line"></i> Creator Dashboard</h1><p>Manage your ideas and community engagement</p></div><button class="btn-primary" onclick="openCreatePostModal()"><i class="fas fa-plus-circle"></i> New Post</button></div>
-      <div class="grid-stats"><div class="glass-card" style="padding:25px;text-align:center;"><h2>${totalPosts}</h2><p>📝 Total Posts</p></div><div class="glass-card" style="padding:25px;text-align:center;"><h2>${totalLikes}</h2><p>❤️ Total Likes</p></div><div class="glass-card" style="padding:25px;text-align:center;"><h2>${totalComments}</h2><p>💬 Total Comments</p></div><div class="glass-card" style="padding:25px;text-align:center;"><h2>${trendingCount}</h2><p>🔥 Trending Posts</p></div></div>
-      <div class="glass-card" style="padding:25px;margin-top:25px;"><h2><i class="fas fa-user-circle"></i> Profile</h2><br><p><strong>Name:</strong> ${sanitizeHTML(currentUser.fullname || 'User')}</p><p><strong>Username:</strong> ${sanitizeHTML(currentUser.username || '-')}</p><p><strong>Bio:</strong> ${sanitizeHTML(currentUser.bio || 'No bio yet')}</p></div>
-      <div class="glass-card" style="padding:25px;margin-top:25px;"><h2><i class="fas fa-clock"></i> Your Recent Posts</h2><br>${myPosts?.length ? myPosts.map(p => `<div style="padding:15px;margin-bottom:15px;border-bottom:1px solid rgba(0,0,0,0.08);"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;"><div><h3>${sanitizeHTML(p.title)}</h3><small>${new Date(p.created_at).toLocaleDateString()}</small><br><br>❤️ ${p.likes_count||0} &nbsp; 💬 ${p.comments_count||0}</div><div style="display:flex;gap:10px;"><button class="dashboardEditBtn btn-outline" data-id="${p.id}" data-title="${encodeURIComponent(p.title)}" data-content="${encodeURIComponent(p.content||'')}" data-category="${encodeURIComponent(p.category||'')}"><i class="fas fa-edit"></i> Edit</button><button class="dashboardDeleteBtn btn-danger" data-id="${p.id}"><i class="fas fa-trash"></i> Delete</button></div></div></div>`).join('') : '<p>No posts yet. Create your first post!</p>'}</div>`;
+    
+    document.getElementById('mainContent').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;">
+        <div><h1><i class="fas fa-chart-line"></i> My Dashboard</h1><p>Manage your content</p></div>
+        <button class="btn-primary" onclick="openCreatePostModal()"><i class="fas fa-plus-circle"></i> New Post</button>
+      </div>
+      <div class="grid-stats">
+        <div class="glass-card" style="padding:25px;text-align:center;"><h2>${totalPosts}</h2><p>📝 My Posts</p></div>
+        <div class="glass-card" style="padding:25px;text-align:center;"><h2>${totalLikes}</h2><p>❤️ Likes Received</p></div>
+        <div class="glass-card" style="padding:25px;text-align:center;"><h2>${totalComments}</h2><p>💬 Comments</p></div>
+      </div>
+      <div class="glass-card" style="padding:25px;margin-top:25px;">
+        <h2><i class="fas fa-user-circle"></i> Profile</h2><br>
+        <p><strong>Name:</strong> ${sanitizeHTML(currentUser.fullname || 'User')}</p>
+        <p><strong>Username:</strong> ${sanitizeHTML(currentUser.username || '-')}</p>
+        <p><strong>Bio:</strong> ${sanitizeHTML(currentUser.bio || 'No bio yet')}</p>
+      </div>
+      <div class="glass-card" style="padding:25px;margin-top:25px;">
+        <h2><i class="fas fa-clock"></i> My Posts</h2><br>
+        ${myPosts?.length ? myPosts.map(p => `
+          <div style="padding:15px;margin-bottom:15px;border-bottom:1px solid rgba(0,0,0,0.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+              <div><h3>${sanitizeHTML(p.title)}</h3><small>${new Date(p.created_at).toLocaleDateString()}</small><br>❤️ ${p.likes_count||0} &nbsp; 💬 ${p.comments_count||0}</div>
+              <div style="display:flex;gap:10px;">
+                <button class="dashboardEditBtn btn-outline btn-sm" data-id="${p.id}" data-title="${encodeURIComponent(p.title)}" data-content="${encodeURIComponent(p.content||'')}" data-category="${encodeURIComponent(p.category||'')}"><i class="fas fa-edit"></i> Edit</button>
+                <button class="dashboardDeleteBtn btn-danger btn-sm" data-id="${p.id}"><i class="fas fa-trash"></i> Delete</button>
+              </div>
+            </div>
+          </div>
+        `).join('') : '<p>No posts yet. Create your first post!</p>'}
+      </div>`;
+    
     document.querySelectorAll('.dashboardEditBtn').forEach(btn => btn.addEventListener('click', () => editPost(btn.dataset.id, decodeURIComponent(btn.dataset.title), decodeURIComponent(btn.dataset.content), decodeURIComponent(btn.dataset.category))));
     document.querySelectorAll('.dashboardDeleteBtn').forEach(btn => btn.addEventListener('click', () => deletePost(btn.dataset.id)));
   }
   
-  function renderAbout() { document.getElementById('mainContent').innerHTML = `<div class="glass-card" style="padding:48px;"><h1><i class="fas fa-building"></i> About Kasturag Tech</h1><p>We build next-gen digital ecosystems. Our mission is to empower innovators, problem solvers, and entrepreneurs.</p><i class="fas fa-check-circle"></i> Trusted by 500+ startups<br><i class="fas fa-shield-alt"></i> Enterprise security & AI-driven insights</div>`; }
-  function renderMarketing() { document.getElementById('marketingSection').innerHTML = `<div class="marketing-banner glass-card" style="padding:32px;text-align:center;"><i class="fas fa-chart-line" style="font-size:2rem;"></i><h3>🚀 Kasturag Tech Enterprise Solutions</h3><button class="btn-primary" onclick="alert('📧 kasturagtech@gmail.com | Let\'s innovate together')"><i class="fas fa-envelope"></i> Contact Us</button></div>`; }
-  function renderCurrentView() { if(currentView === 'home') renderHome(); else if(currentView === 'about') renderAbout(); else if(currentView === 'dashboard') renderDashboard(); }
-  function updateAuthUI() { const authBtn = document.getElementById('authBtn'); if(currentUser) { authBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.fullname?.split(' ')[0]}`; document.getElementById('dashboardNavBtn').style.display = 'inline-block'; } else { authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In'; document.getElementById('dashboardNavBtn').style.display = 'none'; } }
-  function openAuthModal() { alert('🔐 Authentication: Please contact admin or use Supabase Auth (Google/Email). Demo mode active.'); }
-  async function updateNotificationBadge() { if(!currentUser) return; const { count } = await supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('read', false); const badge = document.getElementById('notificationBadge'); if(count>0) { badge.textContent = count; badge.style.display = 'inline-block'; } else badge.style.display = 'none'; }
+  function renderAbout() { 
+    document.getElementById('mainContent').innerHTML = `<div class="glass-card" style="padding:48px;"><h1><i class="fas fa-building"></i> About Kasturag Tech</h1><p>We build next-gen digital ecosystems. Our mission is to empower innovators, problem solvers, and entrepreneurs.</p><i class="fas fa-check-circle"></i> Trusted by 500+ startups<br><i class="fas fa-shield-alt"></i> Enterprise security & AI-driven insights<br><br><h3>✨ Features:</h3><ul><li>✓ Create, Edit, Delete your own posts</li><li>✓ Comment on posts</li><li>✓ Edit/Delete your own comments</li><li>✓ Like posts</li><li>✓ Dark mode support</li><li>✓ Markdown support</li></ul></div>`; 
+  }
   
+  function renderMarketing() { 
+    document.getElementById('marketingSection').innerHTML = `<div class="marketing-banner glass-card" style="padding:32px;text-align:center;margin-top:20px;">
+      <i class="fas fa-chart-line" style="font-size:2rem;"></i>
+      <h3>🚀 Kasturag Tech Enterprise Solutions</h3>
+      <button class="btn-primary" onclick="alert('📧 kasturagtech@gmail.com | Let\\'s innovate together')"><i class="fas fa-envelope"></i> Contact Us</button>
+    </div>`; 
+  }
+  
+  function renderCurrentView() { 
+    if(currentView === 'home') renderHome(); 
+    else if(currentView === 'about') renderAbout(); 
+    else if(currentView === 'dashboard') renderDashboard(); 
+  }
+  
+  function updateAuthUI() { 
+    const authBtn = document.getElementById('authBtn'); 
+    if(currentUser) { 
+      authBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.fullname?.split(' ')[0]}`; 
+      document.getElementById('dashboardNavBtn').style.display = 'inline-block'; 
+    } else { 
+      authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In'; 
+      document.getElementById('dashboardNavBtn').style.display = 'none'; 
+    } 
+  }
+  
+  function openAuthModal() { 
+    alert('🔐 Demo Mode\n\nSign in with any email to test:\n1. Click "Sign In"\n2. Enter email/password\n3. Check your email for magic link\n\nOr use demo@example.com / demo123'); 
+  }
+  
+  // Event listeners
   document.getElementById('homeNavBtn').addEventListener('click', () => { currentView = 'home'; renderCurrentView(); });
   document.getElementById('problemsNavBtn').addEventListener('click', () => { currentFilter = 'Problems'; currentView = 'home'; renderCurrentView(); });
   document.getElementById('ideasNavBtn').addEventListener('click', () => { currentFilter = 'Ideas'; currentView = 'home'; renderCurrentView(); });
@@ -594,7 +712,8 @@
   document.getElementById('dashboardNavBtn').addEventListener('click', () => { if(currentUser) { currentView = 'dashboard'; renderCurrentView(); } else openAuthModal(); });
   document.getElementById('authBtn').addEventListener('click', () => { if(currentUser) supabase.auth.signOut(); else openAuthModal(); });
   document.getElementById('themeToggleBtn').addEventListener('click', () => { document.body.classList.toggle('dark'); localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); });
-  document.getElementById('notificationsBtn')?.addEventListener('click', () => { showToast('🔔 Real-time notifications coming soon!'); });
+  document.getElementById('notificationsBtn')?.addEventListener('click', () => { showToast('🔔 Notifications feature coming soon!'); });
+  
   if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
   
   initSupabase();
