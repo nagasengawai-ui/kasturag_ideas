@@ -88,6 +88,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
+      color: inherit;
     }
     
     .btn-outline:hover {
@@ -109,6 +110,22 @@
     .btn-danger:hover {
       transform: scale(1.02);
       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-success:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
     
     .btn-sm {
@@ -326,8 +343,20 @@
     .post-content-markdown { line-height: 1.6; word-break: break-word; }
     .post-content-markdown pre { background: #1e1e2e; padding: 12px; border-radius: 12px; overflow-x: auto; color: #e2e8f0; }
     
-    .comment-actions { display: flex; gap: 8px; }
+    .comment-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .edited-badge { font-size: 0.7rem; color: #888; margin-left: 8px; font-style: italic; }
+    
+    .post-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .post-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
   </style>
 </head>
 <body>
@@ -379,31 +408,91 @@
   async function initSupabase() {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data: { session } } = await supabase.auth.getSession();
-    if (session) await loadUserProfile(session.user.id);
+    
+    // FIX #1: Ensure currentUser is set from auth session immediately
+    if (session && session.user) {
+      console.log('[INIT] Auth session found. Auth user ID:', session.user.id);
+      await loadUserProfile(session.user.id);
+    }
+    
     supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) await loadUserProfile(session.user.id);
-      else { currentUser = null; }
+      console.log('[AUTH] State changed. Event:', event, 'Session:', session?.user?.id || 'none');
+      if (session && session.user) {
+        await loadUserProfile(session.user.id);
+      } else {
+        currentUser = null;
+      }
       updateAuthUI();
       renderCurrentView();
     });
+    
     updateAuthUI();
     renderCurrentView();
     renderMarketing();
   }
   
+  // FIX #2: Enhanced loadUserProfile with defensive checks and logging
   async function loadUserProfile(userId) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-    if (data) currentUser = { id: userId, ...data };
-    else {
-      const { data: newProfile } = await supabase.from('profiles').insert({ 
-        id: userId, fullname: 'Innovator', username: `creator_${userId.slice(0,6)}`, 
-        join_date: new Date(), bio: 'Passionate problem solver' 
-      }).select().maybeSingle();
-      currentUser = newProfile;
+    if (!userId) {
+      console.warn('[PROFILE] userId is null/undefined');
+      currentUser = null;
+      return;
+    }
+    
+    console.log('[PROFILE] Loading profile for auth user ID:', userId);
+    
+    const { data: existingProfile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+    
+    if (fetchError) {
+      console.error('[PROFILE] Error fetching profile:', fetchError);
+    }
+    
+    if (existingProfile) {
+      currentUser = { id: userId, ...existingProfile };
+      console.log('[PROFILE] Profile loaded. Current user:', {
+        id: currentUser.id,
+        fullname: currentUser.fullname,
+        username: currentUser.username
+      });
+    } else {
+      console.log('[PROFILE] Profile not found, creating new profile for user:', userId);
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          fullname: 'Innovator',
+          username: `creator_${userId.slice(0, 6)}`,
+          join_date: new Date(),
+          bio: 'Passionate problem solver'
+        })
+        .select()
+        .maybeSingle();
+      
+      if (insertError) {
+        console.error('[PROFILE] Error creating profile:', insertError);
+        currentUser = null;
+      } else {
+        currentUser = newProfile;
+        console.log('[PROFILE] New profile created:', {
+          id: currentUser.id,
+          fullname: currentUser.fullname,
+          username: currentUser.username
+        });
+      }
     }
   }
   
-  function sanitizeHTML(str) { return DOMPurify.sanitize(str || '', { ALLOWED_TAGS: ['b','i','em','strong','a','p','br','pre','code','ul','li','ol'], ALLOWED_ATTR: ['href','target'] }); }
+  function sanitizeHTML(str) { 
+    return DOMPurify.sanitize(str || '', { 
+      ALLOWED_TAGS: ['b','i','em','strong','a','p','br','pre','code','ul','li','ol'], 
+      ALLOWED_ATTR: ['href','target'] 
+    }); 
+  }
+  
   function showToast(msg, type = 'success') { 
     const toast = document.createElement('div'); 
     toast.className = 'toast'; 
@@ -414,32 +503,56 @@
   
   // ============ POST CREATE ============
   async function openCreatePostModal() {
-    if (!currentUser) { showToast('Please sign in', 'error'); openAuthModal(); return; }
-    const modal = document.createElement('div'); modal.className = 'modal active';
+    if (!currentUser) { 
+      showToast('Please sign in', 'error'); 
+      openAuthModal(); 
+      return; 
+    }
+    const modal = document.createElement('div'); 
+    modal.className = 'modal active';
     modal.innerHTML = `<div class="modal-content"><h2><i class="fas fa-pen-fancy"></i> Share Your Idea</h2>
       <input type="text" id="postTitle" placeholder="Title *" maxlength="150">
       <select id="postCategory"><option>Technology</option><option>Startups</option><option>Business Ideas</option><option>AI & ML</option><option>Programming</option><option>Career</option><option>Problems</option><option>Ideas</option></select>
       <textarea id="postContent" rows="6" placeholder="Describe in detail... Markdown supported"></textarea>
-      <div style="display:flex; gap:12px; margin-top:20px;"><button id="submitPostBtn" class="btn-primary">Publish</button><button id="cancelPostBtn" class="btn-outline">Cancel</button></div></div>`;
+      <div style="display:flex; gap:12px; margin-top:20px;"><button id="submitPostBtn" class="btn-primary"><i class="fas fa-paper-plane"></i> Publish</button><button id="cancelPostBtn" class="btn-outline">Cancel</button></div></div>`;
     document.body.appendChild(modal);
     document.getElementById('submitPostBtn').onclick = async () => {
       const title = document.getElementById('postTitle').value.trim();
       const content = document.getElementById('postContent').value.trim();
-      if(!title) { showToast('Title required', 'error'); return; }
+      if(!title) { 
+        showToast('Title required', 'error'); 
+        return; 
+      }
       const { error } = await supabase.from('posts').insert({ 
-        title, content, category: document.getElementById('postCategory').value, 
-        author_id: currentUser.id, is_draft: false 
+        title, 
+        content, 
+        category: document.getElementById('postCategory').value, 
+        author_id: currentUser.id,
+        is_draft: false 
       });
-      if(error) showToast(error.message, 'error'); 
-      else { showToast('Posted!'); modal.remove(); renderCurrentView(); }
+      if(error) {
+        console.error('[POST CREATE] Error:', error);
+        showToast(error.message, 'error'); 
+      } else { 
+        showToast('Posted!'); 
+        modal.remove(); 
+        renderCurrentView(); 
+      }
     };
     document.getElementById('cancelPostBtn').onclick = () => modal.remove();
   }
   
   // ============ EDIT POST ============
   async function editPost(postId, oldTitle, oldContent, oldCategory) {
-    if (!currentUser) { showToast('Login required', 'error'); return; }
-    const modal = document.createElement('div'); modal.className = 'modal active';
+    if (!currentUser) { 
+      showToast('Login required', 'error'); 
+      return; 
+    }
+    
+    console.log('[EDIT POST] Starting edit. Current user ID:', currentUser.id);
+    
+    const modal = document.createElement('div'); 
+    modal.className = 'modal active';
     modal.innerHTML = `<div class="modal-content"><h2><i class="fas fa-edit"></i> Edit Post</h2>
       <input id="editTitle" value="${sanitizeHTML(oldTitle)}">
       <select id="editCategory">
@@ -451,18 +564,30 @@
         <option ${oldCategory==='Career'?'selected':''}>Career</option>
       </select>
       <textarea id="editContent" rows="6">${sanitizeHTML(oldContent)}</textarea>
-      <div style="display:flex;gap:10px;margin-top:20px;"><button id="saveEditBtn" class="btn-primary">Save Changes</button><button id="closeEditBtn" class="btn-outline">Cancel</button></div></div>`;
+      <div style="display:flex;gap:10px;margin-top:20px;"><button id="saveEditBtn" class="btn-success"><i class="fas fa-check"></i> Save Changes</button><button id="closeEditBtn" class="btn-outline">Cancel</button></div></div>`;
     document.body.appendChild(modal);
+    
     document.getElementById('closeEditBtn').onclick = () => modal.remove();
     document.getElementById('saveEditBtn').onclick = async () => {
       const title = document.getElementById('editTitle').value;
       const content = document.getElementById('editContent').value;
       const category = document.getElementById('editCategory').value;
+      
+      console.log('[EDIT POST] Saving. Post ID:', postId, 'Author ID:', currentUser.id);
+      
       const { error } = await supabase.from('posts').update({ 
-        title, content, category, updated_at: new Date() 
+        title, 
+        content, 
+        category, 
+        updated_at: new Date() 
       }).eq('id', postId).eq('author_id', currentUser.id);
-      if(error){ showToast(error.message,'error'); return; }
-      showToast('Post updated successfully');
+      
+      if(error){
+        console.error('[EDIT POST] Error:', error);
+        showToast(error.message,'error'); 
+        return; 
+      }
+      showToast('✏️ Post updated successfully');
       modal.remove();
       renderCurrentView();
     };
@@ -470,76 +595,204 @@
   
   // ============ DELETE POST ============
   async function deletePost(postId) {
-    if(!currentUser) return;
+    if(!currentUser) {
+      console.warn('[DELETE POST] No current user');
+      return;
+    }
+    
     const confirmed = confirm('⚠️ Delete this post permanently? This cannot be undone.');
     if(!confirmed) return;
+    
+    console.log('[DELETE POST] Deleting. Post ID:', postId, 'Author ID:', currentUser.id);
+    
     const { error } = await supabase.from('posts').delete().eq('id', postId).eq('author_id', currentUser.id);
-    if(error){ showToast(error.message,'error'); return; }
-    showToast('Post deleted');
+    if(error){
+      console.error('[DELETE POST] Error:', error);
+      showToast(error.message,'error'); 
+      return; 
+    }
+    showToast('🗑️ Post deleted');
     renderCurrentView();
   }
   
   // ============ EDIT COMMENT ============
   async function editComment(commentId, currentContent) {
-    if (!currentUser) { showToast('Login required', 'error'); return; }
-    const newContent = prompt('Edit your comment:', currentContent);
-    if (!newContent || newContent.trim() === '') return;
-    const { error } = await supabase.from('comments').update({ 
-      content: sanitizeHTML(newContent), edited_at: new Date() 
-    }).eq('id', commentId).eq('user_id', currentUser.id);
-    if(error) showToast(error.message, 'error');
-    else { showToast('Comment updated'); renderCurrentView(); }
+    if (!currentUser) { 
+      showToast('Login required', 'error'); 
+      return; 
+    }
+    
+    console.log('[EDIT COMMENT] Starting edit. Current user ID:', currentUser.id);
+    
+    const modal = document.createElement('div'); 
+    modal.className = 'modal active';
+    modal.innerHTML = `<div class="modal-content"><h2><i class="fas fa-edit"></i> Edit Comment</h2>
+      <textarea id="editCommentText" rows="4">${sanitizeHTML(currentContent)}</textarea>
+      <div style="display:flex;gap:10px;margin-top:20px;"><button id="saveCommentBtn" class="btn-success"><i class="fas fa-check"></i> Save</button><button id="cancelCommentBtn" class="btn-outline">Cancel</button></div></div>`;
+    document.body.appendChild(modal);
+    
+    document.getElementById('cancelCommentBtn').onclick = () => modal.remove();
+    document.getElementById('saveCommentBtn').onclick = async () => {
+      const newContent = document.getElementById('editCommentText').value.trim();
+      if (!newContent) { 
+        showToast('Comment cannot be empty', 'error'); 
+        return; 
+      }
+      
+      console.log('[EDIT COMMENT] Saving. Comment ID:', commentId, 'User ID:', currentUser.id);
+      
+      const { error } = await supabase.from('comments').update({ 
+        content: sanitizeHTML(newContent), 
+        edited_at: new Date() 
+      }).eq('id', commentId).eq('user_id', currentUser.id);
+      
+      if(error) {
+        console.error('[EDIT COMMENT] Error:', error);
+        showToast(error.message, 'error');
+      } else { 
+        showToast('✏️ Comment updated'); 
+        modal.remove(); 
+        renderCurrentView(); 
+      }
+    };
   }
   
   // ============ DELETE COMMENT ============
   async function deleteComment(commentId, postId) {
-    if(!currentUser) return;
-    const confirmed = confirm('Delete this comment?');
+    if(!currentUser) {
+      console.warn('[DELETE COMMENT] No current user');
+      return;
+    }
+    
+    const confirmed = confirm('⚠️ Delete this comment permanently?');
     if(!confirmed) return;
+    
+    console.log('[DELETE COMMENT] Deleting. Comment ID:', commentId, 'User ID:', currentUser.id);
+    
     const { error } = await supabase.from('comments').delete().eq('id', commentId).eq('user_id', currentUser.id);
-    if(error) showToast(error.message, 'error');
-    else {
+    if(error) {
+      console.error('[DELETE COMMENT] Error:', error);
+      showToast(error.message, 'error');
+    } else {
       try {
         await supabase.rpc('increment_post_comments', { post_id: postId, inc_amount: -1 });
-      } catch(e) { console.warn(e); }
-      showToast('Comment deleted');
+      } catch(e) { 
+        console.warn('[DELETE COMMENT] RPC error:', e); 
+      }
+      showToast('🗑️ Comment deleted');
       renderCurrentView();
     }
   }
   
+  // FIX #3: Enhanced fetchPosts with author_id explicitly selected
   async function fetchPosts(filter = 'all') {
-    let q = supabase.from('posts').select('*, profiles(fullname, avatar_url)').eq('is_draft', false).order('created_at', { ascending: false }).limit(30);
-    if(filter !== 'all' && filter !== 'Problems' && filter !== 'Ideas') q = q.eq('category', filter);
-    if(filter === 'Problems') q = q.ilike('category', '%Problem%');
-    if(filter === 'Ideas') q = q.ilike('category', '%Idea%');
-    const { data } = await q;
+    let q = supabase
+      .from('posts')
+      .select('id, title, content, category, author_id, created_at, updated_at, likes_count, comments_count, is_draft, profiles(fullname, avatar_url)')
+      .eq('is_draft', false)
+      .order('created_at', { ascending: false })
+      .limit(30);
+    
+    if(filter !== 'all' && filter !== 'Problems' && filter !== 'Ideas') {
+      q = q.eq('category', filter);
+    }
+    if(filter === 'Problems') {
+      q = q.ilike('category', '%Problem%');
+    }
+    if(filter === 'Ideas') {
+      q = q.ilike('category', '%Idea%');
+    }
+    
+    const { data, error } = await q;
+    
+    if (error) {
+      console.error('[FETCH POSTS] Error:', error);
+      return [];
+    }
+    
+    console.log('[FETCH POSTS] Filter:', filter, 'Count:', data?.length || 0);
+    if (data && data.length > 0) {
+      console.log('[FETCH POSTS] Sample post:', {
+        id: data[0].id,
+        title: data[0].title,
+        author_id: data[0].author_id,
+        author_id_type: typeof data[0].author_id
+      });
+    }
+    
     return data || [];
   }
   
   async function toggleLike(postId) {
-    if(!currentUser){ showToast('Login to like', 'error'); openAuthModal(); return; }
-    const { data: existing } = await supabase.from('likes').select('id').eq('target_id', postId).eq('target_type', 'post').eq('user_id', currentUser.id).maybeSingle();
-    if(existing) await supabase.from('likes').delete().eq('id', existing.id);
-    else await supabase.from('likes').insert({ target_id: postId, target_type: 'post', user_id: currentUser.id });
+    if(!currentUser){ 
+      showToast('Login to like', 'error'); 
+      openAuthModal(); 
+      return; 
+    }
+    
+    const { data: existing } = await supabase
+      .from('likes')
+      .select('id')
+      .eq('target_id', postId)
+      .eq('target_type', 'post')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    
+    if(existing) {
+      await supabase.from('likes').delete().eq('id', existing.id);
+    } else {
+      await supabase.from('likes').insert({ 
+        target_id: postId, 
+        target_type: 'post', 
+        user_id: currentUser.id 
+      });
+    }
     renderHome();
   }
   
   async function addComment(postId, content) {
-    if(!currentUser) { showToast('Login to comment', 'error'); openAuthModal(); return; }
+    if(!currentUser) { 
+      showToast('Login to comment', 'error'); 
+      openAuthModal(); 
+      return; 
+    }
     if(!content.trim()) return;
+    
+    console.log('[ADD COMMENT] Adding comment to post:', postId, 'User ID:', currentUser.id);
+    
     const { error } = await supabase.from('comments').insert({ 
-      post_id: postId, user_id: currentUser.id, content: sanitizeHTML(content), parent_id: null 
+      post_id: postId, 
+      user_id: currentUser.id, 
+      content: sanitizeHTML(content), 
+      parent_id: null 
     });
+    
     if(!error) { 
       await supabase.rpc('increment_post_comments', { post_id: postId });
-      showToast('Comment added');
+      showToast('💬 Comment added');
       renderHome();
-    } else showToast(error.message, 'error');
+    } else {
+      console.error('[ADD COMMENT] Error:', error);
+      showToast(error.message, 'error');
+    }
   }
   
+  // FIX #4: Enhanced renderHome with defensive ownership checks and logging
   async function renderHome() {
+    console.log('[RENDER HOME] Starting. Current user:', currentUser?.id || 'none');
+    
     const posts = await fetchPosts(currentFilter);
-    const categoryMap = { all:'All', Technology:'Tech', Startups:'Startups', 'Business Ideas':'Business', 'AI & ML':'AI/ML', Programming:'Code', Career:'Career', Problems:'⚠️ Problems', Ideas:'💡 Ideas' };
+    const categoryMap = { 
+      all:'All', 
+      Technology:'Tech', 
+      Startups:'Startups', 
+      'Business Ideas':'Business', 
+      'AI & ML':'AI/ML', 
+      Programming:'Code', 
+      Career:'Career', 
+      Problems:'⚠️ Problems', 
+      Ideas:'💡 Ideas' 
+    };
     
     let html = `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:24px 0;">
       <div><h1 style="font-size:2rem;"><i class="fas fa-comments"></i> Community Exchange</h1><p>Share challenges, unlock solutions</p></div>
@@ -548,11 +801,38 @@
       <div class="grid-posts">`;
     
     for (const post of posts) {
-      const isOwner = currentUser && currentUser.id === post.author_id;
+      // FIX #5: Defensive null checks for ownership comparison
+      const isOwner = !!(
+        currentUser && 
+        currentUser.id && 
+        post && 
+        post.author_id && 
+        String(currentUser.id) === String(post.author_id)
+      );
+      
+      console.log('[RENDER HOME] Post check:', {
+        postId: post?.id,
+        postAuthorId: post?.author_id,
+        currentUserId: currentUser?.id,
+        isOwner,
+        typesMatch: typeof currentUser?.id === typeof post?.author_id
+      });
+      
       const isTrending = (post.likes_count || 0) >= 5;
       
-      // Fetch comments for this post
-      const { data: comments } = await supabase.from('comments').select('*, profiles(fullname, avatar_url), edited_at').eq('post_id', post.id).is('parent_id', null).order('created_at', { ascending: true });
+      // FIX #6: Enhanced comment fetch with user_id explicitly selected
+      const { data: comments, error: commentsError } = await supabase
+        .from('comments')
+        .select('id, content, user_id, created_at, edited_at, post_id, profiles(fullname, avatar_url)')
+        .eq('post_id', post.id)
+        .is('parent_id', null)
+        .order('created_at', { ascending: true });
+      
+      if (commentsError) {
+        console.error('[RENDER HOME] Comments fetch error:', commentsError);
+      }
+      
+      const commentsArray = comments || [];
       
       html += `<div class="post-card glass-card" data-postid="${post.id}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -562,9 +842,9 @@
               <div><span class="category-tag"><i class="fas fa-tag"></i> ${post.category}</span><small> ${new Date(post.created_at).toLocaleDateString()}</small>${isTrending ? `<span class="trending-badge">🔥 Trending</span>` : ''}</div>
             </div>
           </div>
-          ${isOwner ? `<div style="display:flex;gap:8px;">
+          ${isOwner ? `<div class="post-header-actions">
             <button class="editPostBtn btn-outline btn-sm" data-id="${post.id}" data-title="${encodeURIComponent(post.title)}" data-content="${encodeURIComponent(post.content||'')}" data-category="${encodeURIComponent(post.category||'')}"><i class="fas fa-edit"></i> Edit</button>
-            <button class="deletePostBtn btn-danger btn-sm" data-id="${post.id}"><i class="fas fa-trash"></i> Del</button>
+            <button class="deletePostBtn btn-danger btn-sm" data-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>
           </div>` : ''}
         </div>
         <h3 style="margin:14px 0;">${sanitizeHTML(post.title)}</h3>
@@ -574,28 +854,47 @@
         <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.1);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
             <span><i class="fas fa-comments"></i> Comments (${post.comments_count || 0})</span>
-            <button class="addCommentBtn btn-outline btn-sm" data-id="${post.id}"><i class="fas fa-reply"></i> Add Comment</button>
+            <button class="addCommentBtn btn-success btn-sm" data-id="${post.id}"><i class="fas fa-reply"></i> Add Comment</button>
           </div>
           <div id="comments-${post.id}" class="comments-container" style="max-height: 300px; overflow-y: auto;">
-            ${comments && comments.length ? comments.map(c => `
+            ${commentsArray.length ? commentsArray.map(c => {
+              // FIX #7: Defensive null checks for comment ownership
+              const isCommentOwner = !!(
+                currentUser && 
+                currentUser.id && 
+                c && 
+                c.user_id && 
+                String(currentUser.id) === String(c.user_id)
+              );
+              
+              console.log('[RENDER HOME] Comment check:', {
+                commentId: c?.id,
+                commentUserId: c?.user_id,
+                currentUserId: currentUser?.id,
+                isCommentOwner,
+                typesMatch: typeof currentUser?.id === typeof c?.user_id
+              });
+              
+              return `
               <div class="comment-item" style="margin-bottom: 12px; padding: 12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <div>
-                    <img src="${c.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${c.profiles?.fullname}`}" style="width:28px;height:28px;border-radius:50%;margin-right:8px;">
+                    <img src="${c.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${c.profiles?.fullname}`}" style="width:28px;height:28px;border-radius:50%;margin-right:8px;vertical-align:middle;">
                     <b>${c.profiles?.fullname}</b>
                     <small>${new Date(c.created_at).toLocaleString()}</small>
                     ${c.edited_at ? `<span class="edited-badge"><i class="fas fa-edit"></i> edited</span>` : ''}
                   </div>
-                  ${currentUser && currentUser.id === c.user_id ? `
+                  ${isCommentOwner ? `
                     <div class="comment-actions">
-                      <button class="editCommentBtn btn-outline btn-sm" data-id="${c.id}" data-content="${sanitizeHTML(c.content)}"><i class="fas fa-edit"></i></button>
-                      <button class="deleteCommentBtn btn-danger btn-sm" data-id="${c.id}" data-postid="${post.id}"><i class="fas fa-trash"></i></button>
+                      <button class="editCommentBtn btn-outline btn-sm" data-id="${c.id}" data-content="${sanitizeHTML(c.content)}"><i class="fas fa-edit"></i> Edit</button>
+                      <button class="deleteCommentBtn btn-danger btn-sm" data-id="${c.id}" data-postid="${post.id}"><i class="fas fa-trash"></i> Delete</button>
                     </div>
                   ` : ''}
                 </div>
                 <p style="margin-top: 8px;">${sanitizeHTML(c.content)}</p>
               </div>
-            `).join('') : '<div style="padding: 12px; text-align: center; color: #888;">No comments yet. Be the first!</div>'}
+            `;
+            }).join('') : '<div style="padding: 12px; text-align: center; color: #888;">No comments yet. Be the first!</div>'}
           </div>
         </div>
         
@@ -613,24 +912,68 @@
     document.getElementById('mainContent').innerHTML = html;
     
     // Attach event listeners
-    document.querySelectorAll('.likeBtn').forEach(btn => btn.addEventListener('click', async e => { e.stopPropagation(); await toggleLike(btn.dataset.id); }));
-    document.querySelectorAll('.shareBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); navigator.clipboard.writeText(window.location.origin); showToast('Link copied!'); }));
-    document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => { currentFilter = btn.dataset.filter; renderHome(); }));
-    document.querySelectorAll('.editPostBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); editPost(btn.dataset.id, decodeURIComponent(btn.dataset.title), decodeURIComponent(btn.dataset.content), decodeURIComponent(btn.dataset.category)); }));
-    document.querySelectorAll('.deletePostBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deletePost(btn.dataset.id); }));
-    document.querySelectorAll('.addCommentBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); 
+    document.querySelectorAll('.likeBtn').forEach(btn => btn.addEventListener('click', async e => { 
+      e.stopPropagation(); 
+      await toggleLike(btn.dataset.id); 
+    }));
+    
+    document.querySelectorAll('.shareBtn').forEach(btn => btn.addEventListener('click', e => { 
+      e.stopPropagation(); 
+      navigator.clipboard.writeText(window.location.origin); 
+      showToast('Link copied!'); 
+    }));
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', () => { 
+      currentFilter = btn.dataset.filter; 
+      renderHome(); 
+    }));
+    
+    document.querySelectorAll('.editPostBtn').forEach(btn => btn.addEventListener('click', e => { 
+      e.stopPropagation(); 
+      editPost(btn.dataset.id, decodeURIComponent(btn.dataset.title), decodeURIComponent(btn.dataset.content), decodeURIComponent(btn.dataset.category)); 
+    }));
+    
+    document.querySelectorAll('.deletePostBtn').forEach(btn => btn.addEventListener('click', e => { 
+      e.stopPropagation(); 
+      deletePost(btn.dataset.id); 
+    }));
+    
+    document.querySelectorAll('.addCommentBtn').forEach(btn => btn.addEventListener('click', e => { 
+      e.stopPropagation(); 
       const comment = prompt('Write your comment/solution:'); 
       if(comment) addComment(btn.dataset.id, comment); 
     }));
-    document.querySelectorAll('.editCommentBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); editComment(btn.dataset.id, btn.dataset.content); }));
-    document.querySelectorAll('.deleteCommentBtn').forEach(btn => btn.addEventListener('click', e => { e.stopPropagation(); deleteComment(btn.dataset.id, btn.dataset.postid); }));
+    
+    document.querySelectorAll('.editCommentBtn').forEach(btn => btn.addEventListener('click', e => { 
+      e.stopPropagation(); 
+      editComment(btn.dataset.id, btn.dataset.content); 
+    }));
+    
+    document.querySelectorAll('.deleteCommentBtn').forEach(btn => btn.addEventListener('click', e => { 
+      e.stopPropagation(); 
+      deleteComment(btn.dataset.id, btn.dataset.postid); 
+    }));
+    
     document.getElementById('createPostBtn')?.addEventListener('click', openCreatePostModal);
   }
   
   async function renderDashboard() {
-    if (!currentUser) { showToast('Login to view dashboard', 'error'); return; }
-    const { count: totalPosts } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('author_id', currentUser.id);
-    const { data: myPosts } = await supabase.from('posts').select('*').eq('author_id', currentUser.id).order('created_at', { ascending: false });
+    if (!currentUser) { 
+      showToast('Login to view dashboard', 'error'); 
+      return; 
+    }
+    
+    const { count: totalPosts } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('author_id', currentUser.id);
+    
+    const { data: myPosts } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('author_id', currentUser.id)
+      .order('created_at', { ascending: false });
+    
     const totalLikes = myPosts?.reduce((sum, p) => sum + (p.likes_count || 0), 0) || 0;
     const totalComments = myPosts?.reduce((sum, p) => sum + (p.comments_count || 0), 0) || 0;
     
@@ -656,7 +999,7 @@
           <div style="padding:15px;margin-bottom:15px;border-bottom:1px solid rgba(0,0,0,0.08);">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
               <div><h3>${sanitizeHTML(p.title)}</h3><small>${new Date(p.created_at).toLocaleDateString()}</small><br>❤️ ${p.likes_count||0} &nbsp; 💬 ${p.comments_count||0}</div>
-              <div style="display:flex;gap:10px;">
+              <div class="post-actions">
                 <button class="dashboardEditBtn btn-outline btn-sm" data-id="${p.id}" data-title="${encodeURIComponent(p.title)}" data-content="${encodeURIComponent(p.content||'')}" data-category="${encodeURIComponent(p.category||'')}"><i class="fas fa-edit"></i> Edit</button>
                 <button class="dashboardDeleteBtn btn-danger btn-sm" data-id="${p.id}"><i class="fas fa-trash"></i> Delete</button>
               </div>
